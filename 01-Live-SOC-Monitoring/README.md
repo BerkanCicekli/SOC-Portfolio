@@ -40,4 +40,4 @@ Alert triage · log correlation · IOC validation · escalation decisions · MIT
 
 ## Key lessons learned
 
-*Add 3–5 lessons as you complete the project.*
+-
