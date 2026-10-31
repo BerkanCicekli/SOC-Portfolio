@@ -19,9 +19,12 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
 - Log Management: Attacker IP only communicated with 52[.]15[.]206[.]21, so the scope is limited to one host.
 - Threat intel: Source IP reported on AbuseIPDB and VirusTotal for malicious activity, SSH abuse, phishing and brute force.
 
-**Verdict:** True Positive
-**Reasoning:** Known-malicious IP sending a burst of requests from a restricted region matches automated attack activity, not a legitimate user.
-**Recommended action:** Block source IP; monitor target host. No isolation, because there was no evidence the host was compromised.
-**MITRE ATT&CK:** T1535 – Unused/Unsupported Cloud Regions (per playbook); T1110 – Brute Force (per threat intel and request pattern)
-**Time taken: 20 minutes
-**Platform feedback:** Score 25 (91%). Verdict correct. Missed the isolation question: I said Yes, correct was No. Lesson: malicious source = TP, but isolate only when there's evidence of successful compromise.
+**Outcome:**
+- **Verdict:** True Positive
+- **Reasoning:** Known-malicious IP sending a burst of requests from a restricted region matches automated attack activity, not a legitimate user.
+- **Recommended action:** Block source IP; monitor target host. No isolation, because there was no evidence the host was compromised.
+- **MITRE ATT&CK:** T1535 – Unused/Unsupported Cloud Regions (per playbook); T1110 – Brute Force (per threat intel and request pattern)
+- **Time taken:** 20 minutes
+- **Platform feedback:** Score 25 (91%). Verdict correct. Missed the isolation question: I said Yes, correct was No. Lesson: malicious source = TP, but isolate only when there's evidence of successful compromise.
+
+---
