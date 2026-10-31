@@ -25,5 +25,4 @@ CompTIA Security+ · CompTIA Network+ · CompTIA A+ · ISC2 Certified in Cyberse
 
 ## Contact
 
-- LinkedIn: [add your LinkedIn URL]
-- Email: [add your email]
+- LinkedIn: linkedin.com/in/berkancicekli
