@@ -24,7 +24,7 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
 - **Reasoning:** Known-malicious IP sending a burst of requests from a restricted region matches automated attack activity, not a legitimate user.
 - **Recommended action:** Block source IP; monitor target host. No isolation, because there was no evidence the host was compromised.
 - **MITRE ATT&CK:** T1535 – Unused/Unsupported Cloud Regions (per playbook); T1110 – Brute Force (per threat intel and request pattern)
-- **Time taken:** 20 minutes
+- **Time taken:** 20 min
 - **Platform feedback:** Score 25 (91%). Verdict correct. Missed the isolation question: I said Yes, correct was No. Lesson: malicious source = TP, but isolate only when there's evidence of successful compromise.
 
 ---
@@ -62,5 +62,46 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
   - Discovery: T1033 (whoami); T1069 (whoami /groups); T1087 (net user); T1082 (hostname); T1124 (net time); T1016 (arp, ipconfig); T1049 (netstat); T1057 (tasklist)
 - **Time taken:** 13 min (platform timer, reinvestigation)
 - **Platform feedback:** First attempt: 25 (92%), verdict and isolation correct, missed scope (said Yes, correct No). Reinvestigation: 30 points (100%). Lesson: check Log Management for every destination IP before answering scope; prove compromise with Event ID 4624 instead of assuming.
+
+---
+
+## Alert #3 – SOC344 EDR Tampering Attempt via EDR-Freeze
+- **Date worked:** 2026-11-02
+- **Severity:** High
+- **Alert type:** Malware
+- **Difficulty:** Medium
+- **Hypothesis:** EDR-Freeze is a known tool for suspending security software. Combined with the L1 note of RDP brute force, this could be an attacker who got in and tried to blind the defences.
+
+**Evidence:**
+- Alert: `EDR-Freeze_1.0.exe 6080 10000` executed on WS-Prod-02 (172.16.20.69, Windows) from `C:\Users\LetsDefend\Downloads\`.
+- Log Management (initial access): 4 failed RDP logons (Event 4625) from 212[.]8[.]243[.]56 between 12:59:43 and 13:00:02 UTC, trying usernames `admin` and `letsdefend`, then a successful logon at 13:00:08 (Event 4624, Logon Type 10, username recorded as `LetsDefendsuc`).
+- Log Management (scope): Attacker IP communicated only with 172.16.20.69.
+- Endpoint Security: Process chain `powershell.exe` → `EDR-Freeze_1.0.exe` (PID 1684) → `WerFaultSecure.exe /h /pid 6080 /tid 6076 ...` (PID 6648). PowerShell connected to GitHub IPs shortly before, so the tool was likely downloaded from GitHub. TightVNC server (`tvnserver.exe`) started at 13:02:15 during the attack.
+- Threat intel: SHA256 970c7834…cd85f7 tagged **EDR-Freeze** in LetsDefend Threat Intel. Attacker IP: no match.
+- Note: Log display time is 2 hours behind UtcTime; timeline below uses UTC.
+- Logging gap: process logs only show `powershell.exe` launching, not the commands run inside it. PowerShell script block logging (Event 4104) would have captured them.
+
+**Timeline (UTC):**
+
+| Time | Event |
+|------|-------|
+| 12:59:43–13:00:02 | 4 failed RDP logons from attacker IP (Event 4625) |
+| 13:00:08 | Successful RDP logon (Event 4624, Type 10) |
+| 13:00:26 | PowerShell launched |
+| 13:01:30 | PowerShell connects to GitHub (likely tool download) |
+| 13:02:15 | TightVNC server starts |
+| 13:03:28 | EDR-Freeze runs; WerFaultSecure suspends PID 6080 (Microsoft Defender) for 10 seconds |
+
+**Outcome:**
+- **Verdict:** True Positive
+- **Reasoning:** RDP brute force followed by a successful logon, then within about 3 minutes the attacker used EDR-Freeze to abuse WerFaultSecure and suspend Microsoft Defender. Deliberately disabling defences straight after gaining access shows a hands-on, prepared attacker. Confirmed compromise.
+- **Recommended action:** Isolate host; disable/reset the `LetsDefend` account; block 212[.]8[.]243[.]56; remove direct internet RDP exposure and enforce MFA and account lockout; verify Defender health; remove EDR-Freeze and investigate TightVNC as a possible backdoor; check for persistence before restoring.
+- **MITRE ATT&CK:**
+  - Initial Access: T1078 Valid Accounts
+  - Credential Access: T1110 Brute Force
+  - Execution: T1059.001 PowerShell
+  - Defense Evasion: T1562.001 Impair Defenses – Disable or Modify Tools
+- **Time taken:** 30 Min
+- **Platform feedback:** 30 points (100%). All answers correct. Lessons: isolation is based on confirmed compromise, not on whether lateral movement has happened; T1562 Impair Defenses describes the effect (security tools stopped), whereas Hijack Execution Flow means running attacker code inside a legitimate program; GitHub IPs are legitimate infrastructure, so don't list them as malicious IOCs.
 
 ---
