@@ -25,7 +25,11 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
 - **Recommended action:** Block source IP; monitor target host. No isolation, because there was no evidence the host was compromised.
 - **MITRE ATT&CK:** T1535 – Unused/Unsupported Cloud Regions (per playbook); T1110 – Brute Force (per threat intel and request pattern)
 - **Time taken:** 20 min
-- **Platform feedback:** Score 25 (91%). Verdict correct. Missed the isolation question: I said Yes, correct was No. Lesson: malicious source = TP, but isolate only when there's evidence of successful compromise.
+- **Platform feedback:** Score 25 (91%). Verdict correct. Missed the isolation question: I said Yes, correct was No.
+- **Lessons learned:**
+  - A malicious source IP makes it a True Positive, but isolation is only for evidence of successful compromise.
+  - Check whether the attack actually succeeded before deciding on containment.
+  - Some ATT&CK mappings on the platform are loose: T1535 normally means an attacker using a victim's unused cloud regions, not traffic from a restricted region.
 
 ---
 
@@ -61,7 +65,12 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
   - Execution: T1059.003 Windows Command Shell
   - Discovery: T1033 (whoami); T1069 (whoami /groups); T1087 (net user); T1082 (hostname); T1124 (net time); T1016 (arp, ipconfig); T1049 (netstat); T1057 (tasklist)
 - **Time taken:** 13 min (platform timer, reinvestigation)
-- **Platform feedback:** First attempt: 25 (92%), verdict and isolation correct, missed scope (said Yes, correct No). Reinvestigation: 30 points (100%). Lesson: check Log Management for every destination IP before answering scope; prove compromise with Event ID 4624 instead of assuming.
+- **Platform feedback:** First attempt: 25 (92%), verdict and isolation correct, missed scope (said Yes, correct was No). Reinvestigation: 30 points (100%).
+- **Lessons learned:**
+  - Check Log Management for every destination IP before answering scope. Don't assume brute force means multiple hosts.
+  - Prove compromise with Event IDs: 4625 = failed logon, 4624 = successful logon, Logon Type 10 = RDP.
+  - Discovery commands map directly to ATT&CK techniques (whoami → T1033, net user → T1087, netstat → T1049).
+  - Log sources can use different timezones. Align timestamps before building a timeline.
 
 ---
 
@@ -102,6 +111,11 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
   - Execution: T1059.001 PowerShell
   - Defense Evasion: T1562.001 Impair Defenses – Disable or Modify Tools
 - **Time taken:** 30 Min
-- **Platform feedback:** 30 points (100%). All answers correct. Lessons: isolation is based on confirmed compromise, not on whether lateral movement has happened; T1562 Impair Defenses describes the effect (security tools stopped), whereas Hijack Execution Flow means running attacker code inside a legitimate program; GitHub IPs are legitimate infrastructure, so don't list them as malicious IOCs.
+- **Platform feedback:** 30 points (100%). All answers correct.
+- **Lessons learned:**
+  - Isolation is based on confirmed compromise.
+  - T1562 Impair Defenses describes the effect (security tools stopped); Hijack Execution Flow means running attacker code inside a legitimate program.
+  - GitHub IPs are legitimate infrastructure, so don't list them as malicious IOCs.
+  - Match hashes to their type: MD5 = 32 characters, SHA256 = 64.
 
 ---
