@@ -119,3 +119,48 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
   - Match hashes to their type: MD5 = 32 characters, SHA256 = 64.
 
 ---
+
+## Alert #4 – SOC228 ZeroFont Phishing Detected
+- **Date worked:** 2026-11-03
+- **Severity:** High
+- **Alert type:** Exchange (Phishing)
+- **Difficulty:** Hard
+- **Hypothesis:** An email that bypassed mail security using ZeroFont is likely phishing. The key questions are whether the user clicked, and whether anything ran.
+
+**Evidence:**
+- Email Security: From `noreply[@]googleone[.]com` to elliot@letsdefend.io, subject "You're Out of Storage And May Not Receive New mails!", delivered at 05:02 (Device Action: Allowed). SMTP source 206[.]189[.]190[.]128. Header shows a different Sender IP (172.16.17.241).
+- Email content: Impersonates Google One with an urgent "Gmail is full" lure. The "Get More Space" button links to a zip on Amazon S3. `googleone.com` is a lookalike domain; real Google One emails come from google.com. ZeroFont (hidden zero-size text) used to evade the mail filter.
+- Threat intel: Download URL flagged as malicious / malware in LetsDefend Threat Intel.
+- Endpoint – Browser History: User accessed `hxxps://files-ld[.]s3[.]us-east-2[.]amazonaws[.]com/static/Order_Spesification.zip` at 07:22, about 20 minutes after delivery.
+- Endpoint – Execution check: Processes after 07:22 show only legitimate activity (GoogleUpdate from Program Files, services.exe/UsoSvc, explorer.exe via userinit). No terminal commands.
+- Endpoint – Network: Connections after the download go only to Google, Microsoft, internal and cloud metadata addresses. 35[.]209[.]92[.]19 (Google Cloud range) had no TI match and lines up with Google Update traffic.
+- Log Management: No proxy log for the download, so it only appears in endpoint Browser History. Possible proxy logging gap.
+- Scope: Only one recipient. The same S3 bucket appears in several earlier, unrelated malware incidents (e.g. `blackcat.bin.zip`), so it's a repeat malware source.
+
+**Timeline:**
+
+| Time | Event |
+|------|-------|
+| 05:02 | Phishing email delivered to Elliot (Allowed) |
+| 07:22 | User downloads `Order_Spesification.zip` from the S3 bucket |
+| 07:22 onwards | No malicious processes, commands or C2 traffic observed |
+
+**Outcome:**
+- **Verdict:** True Positive
+- **Reasoning:** Lookalike sender domain, urgency lure and ZeroFont evasion delivered a link to a known-malicious zip, which the user downloaded. No evidence of execution, but malware is confirmed on the host.
+- **Recommended action:** Delete the email from the mailbox; isolate the host as a precaution (malware on disk, execution can't be ruled out); remove the zip and run a full scan before release; block `googleone.com`, 206[.]189[.]190[.]128 and the `files-ld` S3 subdomain (not all of amazonaws.com); tune the email gateway for ZeroFont and lookalike domains; enable link rewriting/sandboxing; follow up with the user and run phishing awareness training.
+- **MITRE ATT&CK:**
+  - Initial Access: T1566.002 Phishing – Spearphishing Link
+  - Execution: T1204.001 User Execution – Malicious Link (user clicked and downloaded)
+  - Defense Evasion: T1027 Obfuscated Files or Information (ZeroFont)
+- **Time taken:** 27 min
+- **Platform feedback:** 25 points (100%). All answers correct.
+- **Lessons learned:**
+  - Clicking a link isn't the same as running the file. Check processes, commands and network separately before deciding what happened.
+  - Malware confirmed on disk with execution not ruled out is enough to isolate as a precaution.
+  - When sources disagree (Browser History shows the download, proxy logs don't), say which source you relied on and note the gap.
+  - Search results can include unrelated incidents. Filter by date and host before drawing conclusions about scope.
+  - Block the specific malicious subdomain, not a whole cloud provider.
+
+---
+
