@@ -20,10 +20,10 @@ Monitoring, triaging and investigating security alerts in LetsDefend's simulated
 
 | Metric | Count |
 |--------|-------|
-| Alerts investigated | 3 |
-| True positives | 3 |
+| Alerts investigated | 5 |
+| True positives | 5 |
 | False positives | 0 |
-| Verdicts correct (per platform scoring) | 3 / 3 |
+| Verdicts correct (per platform scoring) | 5 / 5 |
 
 ## Triage workflow
 
