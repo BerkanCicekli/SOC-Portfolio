@@ -153,7 +153,7 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
   - Initial Access: T1566.002 Phishing – Spearphishing Link
   - Execution: T1204.001 User Execution – Malicious Link (user clicked and downloaded)
   - Defense Evasion: T1027 Obfuscated Files or Information (ZeroFont)
-- **Time taken:** 27 min
+- **Time taken:** 27 Min
 - **Platform feedback:** 25 points (100%). All answers correct.
 - **Lessons learned:**
   - Clicking a link isn't the same as running the file. Check processes, commands and network separately before deciding what happened.
@@ -161,6 +161,56 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
   - When sources disagree (Browser History shows the download, proxy logs don't), say which source you relied on and note the gap.
   - Search results can include unrelated incidents. Filter by date and host before drawing conclusions about scope.
   - Block the specific malicious subdomain, not a whole cloud provider.
+
+---
+
+## Alert #5 – SOC335 CVE-2024-49138 Exploitation Detected
+- **Date worked:** 2026-11-04
+- **Severity:** Medium
+- **Alert type:** Privilege Escalation
+- **Difficulty:** Medium
+- **Hypothesis:** A process named `svohost.exe` (lookalike of svchost.exe) running from `C:\temp` is likely an exploit, not a system process. The key question is whether the attacker reached SYSTEM.
+
+**Evidence:**
+- Alert: `svohost.exe` from `C:\temp\service_installer\` on host Victor (172.16.17.207, Windows 10), run by `LetsDefend`, parent `powershell.exe`, Device Action: Allowed.
+- Log Management: RDP brute force from 185[.]107[.]56[.]141 – 4 failed logons (Event 4625, usernames `admin` and `guest`) then a successful logon at 11:35:50 UTC (Event 4624, Logon Type 10, username `Victor`). Attacker IP reached no other hosts.
+- Endpoint – Terminal History: `whoami /priv` and `whoami` to check privileges, then a PowerShell one-liner that downloaded `service-installer.zip` from `hxxps://files-ld[.]s3[.]us-east-2[.]amazonaws[.]com`, extracted it with 7-Zip using the password "infected", deleted the zip and ran `svohost.exe`. A second `whoami` followed.
+- Endpoint – Processes: `svohost.exe` spawned `powershell.exe` (PID 6528) running as **NT AUTHORITY\SYSTEM**, which ran `whoami`, confirming successful escalation.
+- Endpoint – Network: Connection to Amazon S3 (52.219.102.138) at the time of the download; otherwise only Microsoft/CDN (Defender activity), internal and cloud metadata traffic. No C2 or exfiltration seen.
+- Threat intel: Attacker IP tagged **Brute Force**; file hash tagged **CVE-2024-49138** (30/72 on VirusTotal per platform feedback).
+- Note: Log Management is in UTC; Terminal History is UTC+3.
+
+**Timeline (UTC):**
+
+| Time | Event |
+|------|-------|
+| 11:35:43–11:35:48 | 4 failed RDP logons (4625) from attacker IP |
+| 11:35:50 | Successful RDP logon as `Victor` (4624, Type 10) |
+| 11:36:06 | PowerShell launched |
+| 11:36:26–11:36:38 | `whoami /priv`, `whoami` – privilege check |
+| 11:37:10 | Exploit downloaded from S3, extracted, zip deleted, `svohost.exe` run |
+| 11:37:59 | Exploit spawns PowerShell as SYSTEM; `whoami` confirms |
+
+**Outcome:**
+- **Verdict:** True Positive
+- **Reasoning:** RDP brute force led to a successful logon, and within 2 minutes the attacker downloaded and ran a CVE-2024-49138 exploit, gaining NT AUTHORITY\SYSTEM. Full control of the host.
+- **Recommended action:** Isolate host (SYSTEM compromise – host can't be trusted); reset credentials for `Victor`, `LetsDefend` and any account used on the host; rebuild the host; block 185[.]107[.]56[.]141 and the `files-ld` S3 subdomain; patch CVE-2024-49138 on all Windows hosts; hunt for the exploit hash elsewhere; remove internet-facing RDP; enforce MFA and account lockout.
+- **MITRE ATT&CK:**
+  - Initial Access: T1078 Valid Accounts
+  - Credential Access: T1110 Brute Force
+  - Execution: T1059.001 PowerShell
+  - Command and Control: T1105 Ingress Tool Transfer (exploit download)
+  - Defense Evasion: T1036.005 Masquerading (`svohost.exe`); T1027 Obfuscated Files (password-protected zip); T1070.004 File Deletion (zip removed)
+  - Discovery: T1033 System Owner/User Discovery (`whoami`)
+  - Privilege Escalation: T1068 Exploitation for Privilege Escalation
+- **Time taken:** 18 Min
+- **Platform feedback:** 15 points (100%). All answers correct.
+- **Lessons learned:**
+  - Proof of privilege escalation is a process running as SYSTEM whose parent is the exploit. The attacker's own `whoami` is a useful timestamp to look for.
+  - Lookalike names apply to files as well as domains: `svohost.exe` in `C:\temp` isn't `svchost.exe` in System32.
+  - "Antivirus was running" isn't the same as "antivirus stopped it". Look for evidence of the block.
+  - A local privilege escalation exploit doesn't need C2. LetsDefend called the download server "C2", but it's really a staging server.
+  - After a SYSTEM-level compromise, rebuild the host and reset every credential used on it.
 
 ---
 
