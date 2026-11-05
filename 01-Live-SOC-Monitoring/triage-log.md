@@ -85,7 +85,7 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
 - Alert: `EDR-Freeze_1.0.exe 6080 10000` executed on WS-Prod-02 (172.16.20.69, Windows) from `C:\Users\LetsDefend\Downloads\`.
 - Log Management (initial access): 4 failed RDP logons (Event 4625) from 212[.]8[.]243[.]56 between 12:59:43 and 13:00:02 UTC, trying usernames `admin` and `letsdefend`, then a successful logon at 13:00:08 (Event 4624, Logon Type 10, username recorded as `LetsDefendsuc`).
 - Log Management (scope): Attacker IP communicated only with 172.16.20.69.
-- Endpoint Security: Process chain `powershell.exe` → `EDR-Freeze_1.0.exe` (PID 1684) → `WerFaultSecure.exe /h /pid 6080 /tid 6076 ...` (PID 6648). PowerShell connected to GitHub IPs shortly before, so the tool was likely downloaded from GitHub. TightVNC server (`tvnserver.exe`) started at 13:02:15 during the attack.
+- Endpoint Security: Process chain `powershell.exe` → `EDR-Freeze_1.0.exe` (PID 1684) → `WerFaultSecure.exe /h /pid 6080 /tid 6076 ...` (PID 6648). PowerShell queried `github.com` (DNS) at 13:01:30 UTC and connected to GitHub IPs, so the tool was likely downloaded from GitHub. TightVNC server (`tvnserver.exe`) started at 13:02:15 during the attack.
 - Threat intel: SHA256 970c7834…cd85f7 tagged **EDR-Freeze** in LetsDefend Threat Intel. Attacker IP: no match.
 - Note: Log display time is 2 hours behind UtcTime; timeline below uses UTC.
 - Logging gap: process logs only show `powershell.exe` launching, not the commands run inside it. PowerShell script block logging (Event 4104) would have captured them.
@@ -100,6 +100,24 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
 | 13:01:30 | PowerShell connects to GitHub (likely tool download) |
 | 13:02:15 | TightVNC server starts |
 | 13:03:28 | EDR-Freeze runs; WerFaultSecure suspends PID 6080 (Microsoft Defender) for 10 seconds |
+
+**Screenshots:**
+
+![RDP brute force](screenshots/alert03-rdp-bruteforce.png)
+
+*4 failed RDP logons (4625) then a successful logon (4624, Type 10) from 212[.]8[.]243[.]56.*
+
+![PowerShell DNS query for github.com](screenshots/alert03-github-dns.png)
+
+*PowerShell (PID 8) queried github.com and connected to 140[.]82[.]113[.]4 at 13:01:30 UTC, shortly before EDR-Freeze appeared in Downloads.*
+
+![Process tree](screenshots/alert03-process-tree.png)
+
+*PowerShell launched EDR-Freeze (PID 1684), which launched WerFaultSecure (PID 6648). TightVNC started a minute earlier.*
+
+![WerFaultSecure command line](screenshots/alert03-werfaultsecure-pid6080.png)
+
+*WerFaultSecure invoked against PID 6080 (Microsoft Defender), suspending it for 10 seconds.*
 
 **Outcome:**
 - **Verdict:** True Positive
