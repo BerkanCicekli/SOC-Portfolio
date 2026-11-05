@@ -214,3 +214,53 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
 
 ---
 
+## Alert #6 – SOC246 Forced Authentication Detected
+- **Date worked:** 2026-11-05
+- **Severity:** Medium
+- **Alert type:** Web Attack
+- **Difficulty:** Easy
+- **Hypothesis:** Many POST requests from one IP to a login page suggests a brute force attempt. The host name "WebServer_Test" made me consider authorised testing, so I needed to rule out a planned test.
+
+**Evidence:**
+- Alert: Multiple POST requests from 120[.]48[.]36[.]175 to `http://test-frontend.letsdefend.io/accounts/login` on host WebServer_Test (104.26.15.61). Device Action: Permitted.
+- Log Management – Firewall: Port scan from 10:50:44 to 11:02:57 UTC against at least 10 ports (21, 22, 23, 25, 53, 80, 110, 443, 3000, 3389). Only 80 and 3000 permitted; the rest denied.
+- Log Management – Proxy: Dictionary attack on the login page from 11:05:34 to 11:15:48 UTC, with at least 11 attempts roughly one per minute using common usernames (root, admin, test, guest, info, adm, mysql, user, administrator) and common wordlist passwords (123456, 12345, iloveyou, princess, rockyou, abc123, abcd12345). Same User-Agent throughout (Firefox 78, Windows 10).
+- Log Management – OS: "User Login Successful" for `admin` at 11:15:48 UTC, the same second as the `admin` / `password` attempt.
+- Post-login: No further activity from the attacker IP after 11:15:48 in available logs.
+- Scope: Attacker IP only targeted 104.26.15.61.
+- Planned test check: Searched Email Security for the source IP, host name and domain – no notice of planned testing found. Source is an external IP, not an attack simulation product.
+- Threat intel: No match for 120[.]48[.]36[.]175 in platform Threat Intel; located in China per playbook feedback.
+- Note: The login page uses plain HTTP (port 80), so credentials were sent unencrypted and are visible in proxy logs.
+- Note: Logs are in UTC; the OS log text ("02:15 PM") matches the alert time at UTC+3.
+
+**Timeline (UTC):**
+
+| Time | Event |
+|------|-------|
+| 10:50:44–11:02:57 | Port scan of at least 10 ports; 80 and 3000 permitted |
+| 11:05:34 | First login attempt (`root` / `123456`) |
+| 11:05:34–11:14:18 | Repeated failed attempts with common usernames and passwords |
+| 11:15:48 | Successful login as `admin` / `password` |
+| After 11:15:48 | No further activity observed |
+
+**Outcome:**
+- **Verdict:** True Positive
+- **Reasoning:** Port scan followed by a wordlist attack on the login page, ending in a successful admin login. No evidence of authorised testing despite the "Test" host name.
+- **Recommended action:** Escalate to Tier 2 (admin account compromised); reset the `admin` password and terminate its active sessions; block 120[.]48[.]36[.]175; review the app for any changes made by the admin account; enable HTTPS on the login page; add rate limiting / WAF rules and account lockout on `/accounts/login`; enforce MFA; rename or disable default usernames and ban common passwords; close unnecessary internet-facing ports (e.g. 3000). No host isolation, because there's no evidence the server itself was compromised.
+- **MITRE ATT&CK:**
+  - Discovery: T1046 Network Service Discovery (port scan)
+  - Credential Access: T1110.001 Brute Force – Password Guessing
+  - Initial Access: T1078 Valid Accounts (successful admin login)
+  - Note: The platform tagged T1187 Forced Authentication, but the evidence fits brute force.
+- **Time taken:** 20 min
+- **Platform feedback:** 30 points (100%). All answers correct. Platform classified the attack type as "Other" – OWASP Broken Authentication (A07:2021 Identification and Authentication Failures).
+- **Lessons learned:**
+  - The port scan came first: the attacker checked which services were open, then attacked the one that was (the web login on port 80).
+  - Web logins don't produce Event 4624. I confirmed success from the "User Login Successful" log matching the exact second of the last attempt.
+  - The alert's ATT&CK tag didn't match the evidence. I map techniques from what the logs show, not from the label.
+  - A "Test" host name isn't proof of a planned test. I checked the mailbox for planned work before ruling out a false positive.
+  - A login page on plain HTTP exposes passwords in transit, which is a finding in itself.
+  - For web attacks, the question is escalation rather than isolation: escalate when the attack succeeded.
+
+---
+
