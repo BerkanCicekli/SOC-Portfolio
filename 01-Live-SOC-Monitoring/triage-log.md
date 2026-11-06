@@ -209,6 +209,24 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
 | 11:37:10 | Exploit downloaded from S3, extracted, zip deleted, `svohost.exe` run |
 | 11:37:59 | Exploit spawns PowerShell as SYSTEM; `whoami` confirms |
 
+**Screenshots:**
+
+![RDP brute force](screenshots/alert05-rdp-bruteforce.png)
+
+*4 failed RDP logons (usernames admin, guest) then a successful logon as Victor (4624, Type 10) from 185[.]107[.]56[.]141.*
+
+![Terminal history](screenshots/alert05-terminal-history.png)
+
+*Privilege checks (`whoami /priv`, `whoami`), the exploit download and run, then a second `whoami` to confirm the result. Times are UTC+3.*
+
+![Exploit running as Victor](screenshots/alert05-exploit-as-user.png)
+
+*Before: svohost.exe (CVE-2024-49138 exploit) launched by PowerShell from C:\temp, running as the normal user Victor.*
+
+![PowerShell running as SYSTEM](screenshots/alert05-system-powershell.png)
+
+*After: the exploit spawned PowerShell running as NT AUTHORITY\SYSTEM, which ran whoami. Escalation confirmed.*
+
 **Outcome:**
 - **Verdict:** True Positive
 - **Reasoning:** RDP brute force led to a successful logon, and within 2 minutes the attacker downloaded and ran a CVE-2024-49138 exploit, gaining NT AUTHORITY\SYSTEM. Full control of the host.
