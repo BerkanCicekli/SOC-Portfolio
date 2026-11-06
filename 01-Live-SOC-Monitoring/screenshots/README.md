@@ -12,3 +12,11 @@ Evidence screenshots referenced in the [triage log](../triage-log.md).
 | #5 | [alert05-terminal-history.png](alert05-terminal-history.png) | whoami checks, exploit download and run |
 | #5 | [alert05-exploit-as-user.png](alert05-exploit-as-user.png) | Exploit running as normal user Victor |
 | #5 | [alert05-system-powershell.png](alert05-system-powershell.png) | PowerShell spawned as SYSTEM by the exploit |
+| #7 | [alert07-email.png](alert07-email.png) | Fake CV email with RAR attachment |
+| #7 | [alert07-threatintel-hash.png](alert07-threatintel-hash.png) | Hash tagged ROMCOM / CVE-2025-8088 |
+| #7 | [alert07-winrar-file-creation.png](alert07-winrar-file-creation.png) | Download, WinRAR extraction, files created, registry set |
+| #7 | [alert07-dropped-files.png](alert07-dropped-files.png) | Decoy PDF, Updater.lnk in Startup, msedge.dll in Temp |
+| #7 | [alert07-logon-persistence.png](alert07-logon-persistence.png) | cmd.exe launched by Explorer one second after logon |
+| #7 | [alert07-com-hijack.png](alert07-com-hijack.png) | reg add pointing InprocServer32 at msedge.dll |
+| #7 | [alert07-endpoint-verification.png](alert07-endpoint-verification.png) | Files present; registry rewritten to Temp\1 |
+| #7 | [alert07-cleanup-verified.png](alert07-cleanup-verified.png) | All persistence and files confirmed removed |
