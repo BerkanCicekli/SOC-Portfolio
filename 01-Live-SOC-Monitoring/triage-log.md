@@ -300,3 +300,79 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
 
 ---
 
+## Alert #7 – SOC343 WinRAR Zero-Day Path Traversal Vulnerability (CVE-2025-8088)
+- **Date worked:** 2026-11-06
+- **Severity:** Critical
+- **Alert type:** Malware
+- **Difficulty:** Medium
+- **Hypothesis:** WinRAR writing to a temp folder can be normal when opening a file from an archive, but writing to the Startup folder is not. Combined with an email attachment and a DLL named after Edge sitting in Temp, this looked like the CVE-2025-8088 exploit being used for persistence.
+
+**Evidence:**
+- Email Security: From `2constheatcomshirl[@]seznam[.]cz` to stewart@letsdefend.io, subject "Experienced Web3 Developer – CV Attached for Consideration", attachment `Eli_Rosenfeld_CV2 - Copy (10).rar`, Action: Allowed. Throwaway free-mail address that doesn't match the sender's claimed name (Eli Rosenfeld). Only one recipient.
+- Log Management – delivery: Chrome saved the archive at 20:30:46 UTC (Sysmon 11) as `eli-rosenfeld-cv2-copy-10.rar` (3,631,539 bytes).
+- Log Management – exploitation: WinRAR started at 20:31:11 UTC and created three files at 20:31:28 UTC (Sysmon 11), two of them outside the extraction folder:
+  - `C:\Users\LetsDefend\Downloads\Eli_Rosenfeld_CV.pdf` (decoy)
+  - `C:\Users\LetsDefend\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\Updater.lnk` (persistence)
+  - `C:\Users\LetsDefend\AppData\Local\Temp\msedge.dll` (payload, masquerading as Edge)
+- Endpoint – persistence triggered: A new logon session started at 20:36:10 UTC. At 20:36:26, one second after `explorer.exe` started, `cmd.exe` (parent `explorer.exe`) ran `reg add "HKCU\SOFTWARE\Classes\CLSID\{1299CF18-C4F5-4B6A-BB0F-2299F0398E27}\InprocServer32" /ve /t REG_SZ /d "C:\Users\LETSDE~1\AppData\Local\Temp\2\msedge.dll" /f`. Sysmon Event 13 (Registry Set Value) confirms the COM hijack was written. No further processes after this.
+- Endpoint verification (live machine): `Updater.lnk` (2,034 bytes) and `Temp\msedge.dll` (723,136 bytes) present. At my own logon, `Updater.lnk` ran again and rewrote the registry to `Temp\1\msedge.dll`. No DLL exists at `Temp\1` or `Temp\2`, so the hijack points to a path that doesn't exist and the payload likely never loaded. The persistence was still active.
+- DLL loading: No Sysmon Event 7 (Image Loaded) for `msedge.dll`, though image-load events may not be collected.
+- Network: Connections after the exploit were consistent with WinRAR's own servers (51[.]195[.]68[.]167, one second after WinRAR started), Google, Microsoft and cloud metadata. 23[.]22[.]16[.]1 (AWS) had no Threat Intel match. No C2 identified.
+- Threat intel: File hash E0CBE8F1…C894 tagged **ROMCOM, CVE-2025-8088** (OnlyHunt).
+- Scope: One recipient, one host. The 2023 WinRAR events on host 172.16.17.59 (user Audrey, `DEFCON2023.rar`) are a separate incident.
+- Note: Log display time is 2 hours behind UTC; the timeline uses UTC.
+
+**Timeline (UTC):**
+
+| Time | Event |
+|------|-------|
+| 20:30:08–20:30:35 | User logon; Chrome opened |
+| 20:30:46 | RAR archive saved to Downloads |
+| 20:31:11 | WinRAR opens the archive |
+| 20:31:28 | Decoy PDF, `msedge.dll` (Temp) and `Updater.lnk` (Startup) created |
+| 20:36:10–20:36:25 | New logon session; Explorer starts |
+| 20:36:26 | `Updater.lnk` runs `cmd.exe /c reg add …` – COM hijack written (Sysmon 13) |
+| Investigation | Persistence re-ran at my logon; files, registry key and archive removed and verified |
+
+**Screenshots:**
+
+![WinRAR file creation chain](screenshots/alert07-winrar-file-creation.png)
+
+*Chrome downloads the RAR, WinRAR opens it and creates three files, then cmd.exe and the registry change follow at logon.*
+
+![Dropped files](screenshots/alert07-dropped-files.png)
+
+*Path traversal: a decoy CV in Downloads, Updater.lnk in the Startup folder and msedge.dll in Temp – two of them outside the extraction folder.*
+
+![COM hijack command](screenshots/alert07-com-hijack.png)
+
+*Updater.lnk ran reg add to point a COM component (InprocServer32) at msedge.dll.*
+
+![Endpoint verification](screenshots/alert07-endpoint-verification.png)
+
+*On the live machine: persistence files present, and the registry rewritten to Temp\1 at my logon, where no DLL exists.*
+
+![Cleanup verified](screenshots/alert07-cleanup-verified.png)
+
+*Updater.lnk, msedge.dll, the registry key and the Downloads files all confirmed removed.*
+
+**Outcome:**
+- **Verdict:** True Positive
+- **Reasoning:** A fake CV email delivered a RAR archive that exploited CVE-2025-8088 to write files outside the extraction folder, including a Startup item. At the next logon it registered a COM hijack pointing at a malicious DLL (confirmed by Sysmon 13). Hash tagged ROMCOM in Threat Intel.
+- **Recommended action:** Isolate host; remove `Updater.lnk`, `msedge.dll`, the COM hijack registry key, the archive and the decoy (done and verified); update WinRAR to 7.13 or later on all hosts; delete the email and block the sender address (not all of seznam.cz); hunt for the file hash, `Updater.lnk` in Startup folders and the CLSID key on other hosts; precautionary password reset; warn HR and hiring staff about CV lures and archive attachments; consider sandboxing archive attachments from external senders.
+- **MITRE ATT&CK:**
+  - Initial Access: T1566.001 Phishing – Spearphishing Attachment
+  - Execution: T1204.002 User Execution – Malicious File; T1203 Exploitation for Client Execution; T1059.003 Windows Command Shell
+  - Persistence: T1547.001 Startup Folder; T1546.015 Component Object Model Hijacking
+  - Defense Evasion: T1036 Masquerading (`msedge.dll`, `Updater.lnk`, decoy CV)
+- **Time taken:** 58 min
+- **Platform feedback:** 40 points (100%). All answers correct. Malware type: Trojan; initial access: Phishing; C2: Not Accessed; malware not quarantined.
+- **Lessons learned:**
+  - The exploit's purpose was persistence, not immediate damage. Following the chain from file creation to logon to registry change showed how it was meant to work.
+  - The command line shows what was attempted; Sysmon Event 13 proves the registry change actually happened.
+  - Checking the live machine answered a question the logs couldn't: the registry pointed to a per-session Temp folder where the DLL didn't exist, so the payload likely never loaded.
+  - "Persistence in place" and "payload executed" are different findings. I reported what was confirmed and what wasn't.
+  - Capture evidence before deleting anything, then verify the cleanup.
+  - Filter old incidents out of the scope (the 2023 WinRAR events were a different host and attack).
+
+---
