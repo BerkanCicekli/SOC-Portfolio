@@ -30,3 +30,8 @@ Evidence screenshots referenced in the [triage log](../triage-log.md).
 | #9 | [alert09-terminal-history.png](alert09-terminal-history.png) | Discovery, backdoor account, log and audit deletion |
 | #9 | [alert09-abuseipdb.png](alert09-abuseipdb.png) | AbuseIPDB: 15% confidence, 58 reports |
 | #9 | [alert09-virustotal.png](alert09-virustotal.png) | VirusTotal: 0/92, tagged VPN |
+| #10 | [alert10-alert-details.png](alert10-alert-details.png) | ipconfig launched by 20.exe from Downloads |
+| #10 | [alert10-email.png](alert10-email.png) | Security-themed phishing email |
+| #10 | [alert10-browser-download.png](alert10-browser-download.png) | cleaner.zip download from files-ld S3 |
+| #10 | [alert10-attack-commands.png](alert10-attack-commands.png) | Execution policy bypass, discovery, admin tampering |
+| #10 | [alert10-vbs-ipconfig.png](alert10-vbs-ipconfig.png) | m2.ps1, ipconfig (alert), tmp.vbs |
