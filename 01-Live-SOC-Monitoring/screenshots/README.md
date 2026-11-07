@@ -20,3 +20,9 @@ Evidence screenshots referenced in the [triage log](../triage-log.md).
 | #7 | [alert07-com-hijack.png](alert07-com-hijack.png) | reg add pointing InprocServer32 at msedge.dll |
 | #7 | [alert07-endpoint-verification.png](alert07-endpoint-verification.png) | Files present; registry rewritten to Temp\1 |
 | #7 | [alert07-cleanup-verified.png](alert07-cleanup-verified.png) | All persistence and files confirmed removed |
+| #8 | [alert08-email.png](alert08-email.png) | Phishing email with mail.rtf attachment |
+| #8 | [alert08-process-chain.png](alert08-process-chain.png) | OUTLOOK.EXE → cmd.exe → regsvr32.exe |
+| #8 | [alert08-regsvr32-command.png](alert08-regsvr32-command.png) | regsvr32 fetching shell.sct (Squiblydoo) |
+| #8 | [alert08-proxy-request.png](alert08-proxy-request.png) | Proxy permitted the shell.sct request |
+| #8 | [alert08-network-c2.png](alert08-network-c2.png) | Connection to malicious IP 84.38.130.118 |
+| #8 | [alert08-threatintel-ip.png](alert08-threatintel-ip.png) | Attacker IP tagged Malicious |
