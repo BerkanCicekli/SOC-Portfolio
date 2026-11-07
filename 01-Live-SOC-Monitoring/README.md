@@ -1,6 +1,6 @@
 # Project 1: Live SOC Alert Monitoring
 
-**Platform:** LetsDefend · **Role simulated:** SOC Tier 1 Analyst · **Status:** In progress
+**Platform:** LetsDefend · **Role simulated:** SOC Tier 1 Analyst · **Status:** Complete
 
 ## Overview
 
