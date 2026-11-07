@@ -443,3 +443,76 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
 
 ---
 
+## Alert #9 – SOC306 Critical System File Deletion
+- **Date worked:** 2026-11-07
+- **Severity:** Medium
+- **Alert type:** Persistence / Defense Evasion
+- **Difficulty:** Medium
+- **Hypothesis:** Deleting audit rules could be an admin changing logging, but the L1 note mentioned a search for an external IP in the auth logs. If someone was searching for an IP and then deleting logs, they were more likely hiding their own login.
+
+**Evidence:**
+- Alert: `rm -r audit.rules` on Linux host Dominic (172.16.17.107).
+- Log Management – SSH: 6 failed SSH logins for user `analyst` from 87[.]249[.]134[.]136 between 15:09:42 and 15:10:25 UTC ("Failed password … ssh2"), then "Accepted password for analyst" at 15:10:30 UTC.
+- Log Management – auditd: EXECVE record of `grep --color=auto 87.249.134.136` at 15:13:48 UTC. The audit timestamp (1722438828) confirms Terminal History is in UTC and the log display is 2 hours behind.
+- Endpoint – Terminal History (commands began 12 seconds after login):
+  - Discovery: `whoami`, `groups`, `cat /etc/group`
+  - Credential search: `find / -type f -name '*password*'`
+  - Backdoor account: `sudo useradd -m lettsdefend`, `sudo passwd lettsdefend` (lookalike of letsdefend, created with root privileges)
+  - Covering tracks: `cat auth.log | grep "87.249.134.136"` then `rm -r auth.log`
+  - Disabling auditing: `cat audit.rules` then `rm -r audit.rules`
+- SIEM retained the authentication and audit logs even though the attacker deleted them on the host.
+- Scope: Attacker IP only communicated with 172.16.17.107.
+- Threat intel: No match in LetsDefend TI. AbuseIPDB 15% confidence with 58 reports (Hacking, Web App Attack); VirusTotal 0/92, tagged VPN. Datacamp Limited hosting/VPN range, so reputation is mixed; verdict based on behaviour.
+
+**Timeline (UTC):**
+
+| Time | Event |
+|------|-------|
+| 15:09:42–15:10:25 | 6 failed SSH logins for `analyst` |
+| 15:10:30 | Successful SSH login as `analyst` |
+| 15:10:42–15:12:07 | Discovery: whoami, groups, /etc/group |
+| 15:12:30 | Search for password files |
+| 15:13:04–15:13:11 | Backdoor account `lettsdefend` created with sudo |
+| 15:13:48–15:13:54 | Searched auth.log for own IP, then deleted auth.log |
+| 15:14:41 | Deleted audit.rules (alert triggered) |
+
+**Screenshots:**
+
+![SSH brute force](screenshots/alert09-ssh-bruteforce.png)
+
+*6 failed SSH logins then "Accepted password for analyst"; the top row is auditd recording the attacker's grep for their own IP.*
+
+![Terminal history](screenshots/alert09-terminal-history.png)
+
+*Discovery, password file search, backdoor account creation, then deleting auth.log and audit.rules – all within 4 minutes.*
+
+![AbuseIPDB](screenshots/alert09-abuseipdb.png)
+
+*AbuseIPDB: 15% confidence but 58 reports – a shared hosting/VPN address.*
+
+![VirusTotal](screenshots/alert09-virustotal.png)
+
+*VirusTotal: 0/92, tagged VPN. A clean reputation doesn't outweigh the behaviour.*
+
+**Outcome:**
+- **Verdict:** True Positive
+- **Reasoning:** SSH brute force led to a successful login, after which the attacker ran discovery, searched for password files, used sudo to create a lookalike backdoor account, deleted the auth log containing their own IP and deleted the audit rules. Full compromise with root access and persistence.
+- **Recommended action:** Isolate and rebuild the host; disable and reset the `analyst` account; delete `lettsdefend` and hunt for it on other hosts; restore audit rules and auth.log and re-enable auditd; check cron, `~/.ssh/authorized_keys` and `/etc/sudoers` for further persistence; rotate any credentials found in password files; block 87[.]249[.]134[.]136; restrict SSH (VPN or allow-list, key-based authentication, lockout/fail2ban); alert on log and audit-rule deletion across all hosts.
+- **MITRE ATT&CK:**
+  - Initial Access: T1133 External Remote Services (SSH); T1078 Valid Accounts
+  - Credential Access: T1110.001 Brute Force – Password Guessing; T1552.001 Credentials in Files
+  - Discovery: T1033 System Owner/User Discovery; T1069 Permission Groups Discovery
+  - Persistence: T1136.001 Create Account – Local Account
+  - Defense Evasion: T1562.012 Disable or Modify Linux Audit System; T1070.002 Clear Linux or Mac System Logs
+- **Time taken:** 30 min
+- **Platform feedback:** 30 points (100%). All answers correct. Defense evasion type: Impair Defenses.
+- **Lessons learned:**
+  - On Linux, "Failed password" and "Accepted password" in the SSH logs play the role of Windows Events 4625 and 4624.
+  - An attacker searching the logs for their own IP and then deleting them is clear evidence of covering tracks – no admin does that.
+  - Central logging matters: the attacker deleted auth.log on the host, but the SIEM already had a copy.
+  - A Unix timestamp in an audit record can settle a timezone question precisely.
+  - Reputation sources can disagree, especially for VPN and hosting IPs. I cross-check several and let the behaviour decide.
+  - Impair Defenses (disabling auditing) and Indicator Removal (deleting logs) are different techniques, and this attacker used both.
+
+---
+
