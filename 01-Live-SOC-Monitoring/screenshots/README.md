@@ -26,3 +26,7 @@ Evidence screenshots referenced in the [triage log](../triage-log.md).
 | #8 | [alert08-proxy-request.png](alert08-proxy-request.png) | Proxy permitted the shell.sct request |
 | #8 | [alert08-network-c2.png](alert08-network-c2.png) | Connection to malicious IP 84.38.130.118 |
 | #8 | [alert08-threatintel-ip.png](alert08-threatintel-ip.png) | Attacker IP tagged Malicious |
+| #9 | [alert09-ssh-bruteforce.png](alert09-ssh-bruteforce.png) | 6 failed SSH logins, then accepted; auditd grep record |
+| #9 | [alert09-terminal-history.png](alert09-terminal-history.png) | Discovery, backdoor account, log and audit deletion |
+| #9 | [alert09-abuseipdb.png](alert09-abuseipdb.png) | AbuseIPDB: 15% confidence, 58 reports |
+| #9 | [alert09-virustotal.png](alert09-virustotal.png) | VirusTotal: 0/92, tagged VPN |
