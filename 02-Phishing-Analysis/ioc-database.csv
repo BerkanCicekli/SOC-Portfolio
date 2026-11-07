@@ -1,1 +1,15 @@
 IOC_Type,Value,Context,Confidence,Source_Case
+Email,erikajohana.lopez[@]uptc[.]edu[.]co,Phishing sender (likely compromised account),Medium,PhishStrike
+IP,107[.]175[.]247[.]199,Malware hosting server (BitRAT/AsyncRAT/CoinMiner),High,PhishStrike
+URL,hxxp://107[.]175[.]247[.]199/loader/install[.]exe,Link in phishing email - multi-payload,High,PhishStrike
+URL,hxxp://107[.]175[.]247[.]199/loader/server[.]exe,BitRAT download,High,PhishStrike
+URL,hxxp://107[.]175[.]247[.]199/loader/Rckjlz[.]exe,PureCrypter download,High,PhishStrike
+Domain,ripley[.]studio,Resolves to malware hosting server,High,PhishStrike
+URL,hxxp://ripley[.]studio/loader/uploads/Qanjttrbv[.]jpeg,Next-stage payload disguised as image,High,PhishStrike
+Domain,gh9st[.]mywire[.]org,BitRAT C2 (dynamic DNS),High,PhishStrike
+SHA256,bf7628695c2df7a3020034a065397592a1f8850e59f9a448b555bc1c8c639539,BitRAT (dropped as Jzwvix.exe),High,PhishStrike
+SHA256,5ca468704e7ccb8e1b37c0f7595c54df4e2f4035345b6e442e8bd4e11c58f791,AsyncRAT,High,PhishStrike
+SHA256,453fb1c4b3b48361fa8a67dcedf1eaec39449cb5a146a7770c63d1dc0d7562f0,CoinMiner / PureCrypter loader,High,PhishStrike
+Registry,HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Jzwvix,BitRAT persistence,High,PhishStrike
+File_Path,%APPDATA%\Ozndcoodb\Jzwvix.exe,BitRAT persistent copy,High,PhishStrike
+Telegram_Bot_ID,5610920260,AsyncRAT C2/exfiltration channel,High,PhishStrike
