@@ -516,3 +516,78 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
 
 ---
 
+## Alert #10 – SOC281 System Network Configuration Discovery Detected
+- **Date worked:** 2026-11-07
+- **Severity:** Low
+- **Alert type:** Malware (Discovery)
+- **Difficulty:** Medium
+- **Hypothesis:** `ipconfig /all` is a routine admin command, so this could easily be a false positive. But it was launched by `20.exe` from a Downloads folder, and the L1 note linked it to a file shared via an email link. The key question was who ran it and what else happened around it.
+
+**Evidence:**
+- Alert: `cmd.exe /c ipconfig /all` on host Andrew (172.16.17.97, Windows 10), parent `C:\Users\LetsDefend\Downloads\20\20.exe`, current directory `Downloads\cleaner\`.
+- Email Security: From `jame[@]cleanpatron[.]top` to andrew@letsdefend.io at 06:12, subject "Malicious Content Detection Application" – a security-themed lure offering a "cleaner" tool via a download link. Sender IP 104[.]21[.]89[.]22 (Cloudflare). Action: Allowed. Only one recipient.
+- Browser History: Andrew downloaded `hxxps://files-ld[.]s3[.]us-east-2[.]amazonaws[.]com/cleaner.zip` at 08:40:36. The same S3 bucket appeared in Alerts #4, #5 and several earlier incidents. All other browsing was ordinary Windows news sites.
+- Terminal History (attacker activity, 08:41:03–08:42:29):
+  - `cleaner.ps1` run with `Set-ExecutionPolicy -Scope Process Bypass` (the "Run with PowerShell" pattern, so the user ran it), 27 seconds after the download
+  - Discovery: `wmic ntdomain get domainname`, `net localgroup administrators`, `net group "domain admins" /domain`
+  - Account manipulation: `net user administrator "" & echo a > C:/windows/temp/admin.txt` (attempt to blank the local Administrator password)
+  - `powershell -exec bypass "import-module …\Downloads\20\m2.ps1"` (repeated)
+  - `cmd /c ipconfig /all` from `20.exe` (alert trigger)
+  - `cmd /c call "c:\windows\temp\tmp.vbs"` – last command
+- Background noise ruled out: AWS driver checks, Get-WinEvent health checks, Software Inventory Logging and SentinelOne browser host commands are routine and automated.
+- Network: Sequential connections to 34.201.x.x (one per second from 08:44:42) coincide with `msiexec.exe` launched by the genuine `SentinelAgent.exe` (SYSTEM) at 08:44:41 – consistent with a SentinelOne agent update. No Threat Intel matches; no C2 identified.
+- Threat intel: `cleanpatron.top` – no match. A different URL serving "cleaner.zip" is tagged malware_download (URLhaus); the files-ld URL itself was not matched.
+- Scope: One recipient, one host. No other host downloaded cleaner.zip.
+
+**Timeline:**
+
+| Time | Event |
+|------|-------|
+| 06:12:00 | Phishing email delivered to Andrew (Allowed) |
+| 08:40:36 | Andrew downloads `cleaner.zip` from the files-ld S3 bucket |
+| 08:41:03 | `cleaner.ps1` runs with execution policy bypassed |
+| 08:41:16–08:41:23 | Domain and admin discovery; Administrator password tampering |
+| 08:41:26–08:41:38 | `m2.ps1` loaded; `ipconfig /all` from `20.exe` (alert) |
+| 08:42:28–08:42:29 | `tmp.vbs` runs from C:\Windows\Temp; no further commands |
+
+**Screenshots:**
+
+![Alert details](screenshots/alert10-alert-details.png)
+
+*ipconfig /all launched by 20.exe from a Downloads folder.*
+
+![Phishing email](screenshots/alert10-email.png)
+
+*A "security tool" lure from cleanpatron.top with a download link.*
+
+![Download](screenshots/alert10-browser-download.png)
+
+*cleaner.zip downloaded from the files-ld S3 bucket among ordinary browsing.*
+
+![Attack commands](screenshots/alert10-attack-commands.png)
+
+*cleaner.ps1 run with the execution policy bypassed, then domain and admin discovery and the Administrator password change attempt.*
+
+![VBScript and ipconfig](screenshots/alert10-vbs-ipconfig.png)
+
+*m2.ps1 loaded, ipconfig /all (alert trigger), then tmp.vbs – the last command.*
+
+**Outcome:**
+- **Verdict:** True Positive
+- **Reasoning:** A security-themed phishing email led Andrew to download and run a fake cleaner tool, which bypassed PowerShell restrictions, enumerated the domain and its admins, tried to blank the local Administrator password, loaded a second script and ran a VBScript. The ipconfig command was one step in this chain.
+- **Recommended action:** Isolate and rebuild the host; reset the local Administrator password (check whether it was blanked) and Andrew's password; delete the email and block the sender and `cleanpatron.top`; block the files-ld S3 subdomain (now seen in four incidents); hunt for cleaner.zip, 20.exe, m2.ps1 and tmp.vbs on other hosts; monitor domain admin accounts; enforce signed PowerShell scripts, enable script block logging and alert on `-exec bypass`; warn staff about unsolicited "security tools".
+- **MITRE ATT&CK:**
+  - Initial Access: T1566.002 Phishing – Spearphishing Link
+  - Execution: T1204.002 User Execution – Malicious File; T1059.001 PowerShell; T1059.003 Windows Command Shell; T1059.005 Visual Basic
+  - Discovery: T1016 System Network Configuration Discovery; T1069.001 / T1069.002 Local and Domain Groups
+  - Persistence / Privilege: T1098 Account Manipulation
+- **Time taken:** 25 min
+- **Platform feedback:** 20 points (92%). Missed Attacker IP Analysis: answered Internal, correct was External.
+- **Lessons learned:**
+  - The same command can be harmless or malicious. What made ipconfig malicious here was its parent (20.exe from Downloads) and the commands around it.
+  - Most of the 173 commands were background noise from cloud agents and the EDR. Recognising that noise and skipping it is a core skill.
+  - I checked a scan-like network pattern and found a benign explanation (an EDR update), rather than adding it to the attack.
+  - Attacker origin is about where the attack came from (an external email sender), not where the commands ran. My first instinct was External and it was right – I should trust my own reasoning and check it rather than switch.
+  - Lures that pose as security tools exploit careful users.
+
+---
