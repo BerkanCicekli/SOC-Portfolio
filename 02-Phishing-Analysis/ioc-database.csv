@@ -20,3 +20,14 @@ Telegram_Bot_ID,5457463144,Phishing kit exfiltration bot (token withheld),High,G
 Telegram_Chat_ID,5442785564,Phishing kit receiving chat,High,GrabThePhisher
 Alias,j1j1b1s@m3r0,Phishing kit author signature,Medium,GrabThePhisher
 URL_Pattern,/metamask/metamask.php,Path to credential stealer on kit hosting servers,Medium,GrabThePhisher
+Email,theceojamessmith[@]Drurnbo[.]com,Phishing sender - lookalike of Drumbo.com,High,BRabbit
+Domain,Drurnbo[.]com,Lookalike of company domain,High,BRabbit
+Domain,dezoeteinval[.]co[.]za,Attacker-controlled sending domain,High,BRabbit
+Email,Return[@]alaho-akbar[.]dezoeteinval[.]co[.]za,Return-Path,High,BRabbit
+IP,51[.]195[.]254[.]223,Sending server (OVH VPS),High,BRabbit
+File_Name,Urgent Contract Action.pdf.exe,Attachment - double extension,High,BRabbit
+SHA256,630325cac09ac3fab908f903e3b00d0dadd5fdaa0875ed8496fcbb97a558d0da,Bad Rabbit dropper,High,BRabbit
+MD5,fbbdc39af1139aebba4da004475e8839,Bad Rabbit dropper,High,BRabbit
+File_Path,C:\Windows\infpub.dat,Dropped malicious DLL,High,BRabbit
+File_Path,C:\Windows\dispci.exe,Disk encryption component,High,BRabbit
+Scheduled_Task,rhaegal / drogon,Bad Rabbit persistence,High,BRabbit
