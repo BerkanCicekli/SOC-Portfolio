@@ -1,6 +1,6 @@
 # Project 2: Phishing Email Analysis
 
-**Platform:** CyberDefenders · **Status:** Planned
+**Platform:** CyberDefenders · **Status:** In progress
 
 ## Overview
 
@@ -19,9 +19,9 @@ Investigating phishing emails by analysing headers, authentication results, URLs
 
 | # | Case | Type | Key finding |
 |---|------|------|-------------|
-| 1 | *coming soon* | Credential phishing | |
-| 2 | *coming soon* | Malware delivery | |
-| 3 | *coming soon* | Business email compromise | |
+| 1 | [PhishStrike – fake invoice delivers BitRAT, AsyncRAT and a CoinMiner](cases/01-phishstrike/report.md) | Malicious link / Multi-payload malware | SPF/DKIM failures caused by a gateway, not spoofing; one URL served three malware families |
+| 2 | [GrabThePhisher – inside a crypto wallet phishing kit](cases/02-grabthephisher/report.md) | Credential phishing kit | Recovery phrases exfiltrated via a Telegram bot; author alias found in the code |
+| 3 | *coming soon* | Phishing to ransomware | |
 
 ## Analysis workflow
 
