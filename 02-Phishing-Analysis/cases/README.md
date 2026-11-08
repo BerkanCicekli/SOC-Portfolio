@@ -1,6 +1,6 @@
 # Phishing Cases
 
-One folder per case, each with a `report.md` and a `screenshots/` subfolder. Reports focus on method, evidence and reasoning; all IOCs are defanged.
+One folder per case, each with a `report.md` and, where useful, a `screenshots/` subfolder. Reports focus on method, evidence and reasoning; all IOCs are defanged.
 
 | # | Case | Type | Key finding |
 |---|------|------|-------------|
