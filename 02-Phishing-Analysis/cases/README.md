@@ -5,5 +5,5 @@ One folder per case, each with a `report.md` and a `screenshots/` subfolder. Rep
 | # | Case | Type | Key finding |
 |---|------|------|-------------|
 | 1 | [PhishStrike – fake invoice delivers BitRAT, AsyncRAT and a CoinMiner](01-phishstrike/report.md) | Malicious link / Multi-payload malware | SPF/DKIM failures caused by a gateway, not spoofing |
-| 2 | *coming soon* | Credential phishing kit | |
+| 2 | [GrabThePhisher – inside a crypto wallet phishing kit](02-grabthephisher/report.md) | Credential phishing kit | Seed phrases exfiltrated via Telegram bot; author alias found in code |
 | 3 | *coming soon* | Phishing to ransomware | |
