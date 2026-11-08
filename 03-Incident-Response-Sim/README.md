@@ -20,7 +20,7 @@ Full-cycle incident investigations in Splunk: scoping alerts, correlating logs a
 
 | # | Incident | Key techniques | Report |
 |---|----------|----------------|--------|
-| 1 | Brute force → account compromise | *TBC* | *coming soon* |
+| 1 | Brute force → account compromise | *TBC* | v |
 | 2 | Malicious PowerShell execution | *TBC* | *coming soon* |
 | 3 | Ransomware / APT campaign | *TBC* | *coming soon* |
 
@@ -34,8 +34,8 @@ Full-cycle incident investigations in Splunk: scoping alerts, correlating logs a
 | Windows Event Logs | Security events | ☐ |
 | Incident Handling with Splunk | Multi-stage attack | ☐ |
 
-*(Room names on TryHackMe change — update to the exact names you complete.)*
+*(Room names on TryHackMe change)*
 
 ## Key lessons learned
 
-*Add as you complete investigations.*
+*coming soon*
