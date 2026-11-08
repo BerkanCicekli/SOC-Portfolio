@@ -1,6 +1,6 @@
 # Project 2: Phishing Email Analysis
 
-**Platform:** CyberDefenders · **Status:** In progress
+**Platform:** CyberDefenders · **Status:** Complete
 
 ## Overview
 
