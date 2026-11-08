@@ -8,9 +8,9 @@ Hands-on security operations work completed on **LetsDefend**, **CyberDefenders*
 
 | # | Project | Platform | Skills | Status |
 |---|---------|----------|--------|--------|
-| 01 | [Live SOC Alert Monitoring](01-Live-SOC-Monitoring/) | LetsDefend | Alert triage, log analysis, escalation decisions | In progress |
-| 02 | [Phishing Email Analysis](02-Phishing-Analysis/) | CyberDefenders | Email header analysis, URL/attachment analysis, IOC extraction | Planned |
-| 03 | [Incident Response Simulation](03-Incident-Response-Sim/) | TryHackMe | Splunk SPL, Sysmon, Windows Event Logs, MITRE ATT&CK | Planned |
+| 01 | [Live SOC Alert Monitoring](01-Live-SOC-Monitoring/) | LetsDefend | Alert triage, log analysis, escalation decisions | Complete |
+| 02 | [Phishing Email Analysis](02-Phishing-Analysis/) | CyberDefenders | Email header analysis, URL/attachment analysis, IOC extraction | Complete |
+| 03 | [Incident Response Simulation](03-Incident-Response-Sim/) | TryHackMe | Splunk SPL, Sysmon, Windows Event Logs, MITRE ATT&CK | In progress |
 
 ## Skills
 
