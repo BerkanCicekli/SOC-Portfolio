@@ -34,4 +34,16 @@ Investigating phishing emails by analysing headers, authentication results, URLs
 
 ## Key lessons learned
 
-*Add as you complete cases.*
+1. **Authentication results need context.** In PhishStrike, SPF and DKIM *failed* on a genuine (compromised) account because an email gateway sat in the delivery path. In BRabbit, all three checks *passed* for an attacker-owned domain. A result only tells you which domain vouches for an email, not whether to trust it. ([PhishStrike](cases/01-phishstrike/report.md), [BRabbit](cases/03-brabbit/report.md))
+
+2. **Pivot from your own indicators.** Searching a malware tag returns the whole internet; following *this* URL's payloads kept the analysis on the right samples. ([PhishStrike](cases/01-phishstrike/report.md))
+
+3. **Attackers hide in legitimate services.** Telegram bots, dynamic DNS and a public geolocation API all appeared across the cases. Reputation alone won't catch them, so detection has to look at context. ([PhishStrike](cases/01-phishstrike/report.md), [GrabThePhisher](cases/02-grabthephisher/report.md))
+
+4. **Look closely at names.** `Drurnbo` vs `Drumbo`, `.pdf.exe`, a "JPEG" that was a payload, `Jzwvix.exe` copied into AppData. Deception is often in the details. ([BRabbit](cases/03-brabbit/report.md), [PhishStrike](cases/01-phishstrike/report.md))
+
+5. **Sandbox output needs filtering.** Hundreds of "dropped" files were encryption noise, and vendors disagreed on labels. Cross-checking the process graph, registry and file list told the real story. ([BRabbit](cases/03-brabbit/report.md), [PhishStrike](cases/01-phishstrike/report.md))
+
+6. **Handle sensitive data responsibly.** I analysed malware without running it, and withheld victims' recovery phrases and an attacker's live bot token from public reports. ([GrabThePhisher](cases/02-grabthephisher/report.md))
+
+7. **The same entry point, very different impact.** Phishing led to remote access and crypto-mining, to stolen wallets, and to network-wide ransomware.
