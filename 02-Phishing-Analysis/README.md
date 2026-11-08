@@ -21,7 +21,7 @@ Investigating phishing emails by analysing headers, authentication results, URLs
 |---|------|------|-------------|
 | 1 | [PhishStrike – fake invoice delivers BitRAT, AsyncRAT and a CoinMiner](cases/01-phishstrike/report.md) | Malicious link / Multi-payload malware | SPF/DKIM failures caused by a gateway, not spoofing; one URL served three malware families |
 | 2 | [GrabThePhisher – inside a crypto wallet phishing kit](cases/02-grabthephisher/report.md) | Credential phishing kit | Recovery phrases exfiltrated via a Telegram bot; author alias found in the code |
-| 3 | *coming soon* | Phishing to ransomware | |
+| 3 | [BRabbit – fake employment contract delivers Bad Rabbit ransomware](03-brabbit/report.md) | Phishing to ransomware | Email passed SPF/DKIM/DMARC from an attacker-owned domain; lookalike company domain |
 
 ## Analysis workflow
 
