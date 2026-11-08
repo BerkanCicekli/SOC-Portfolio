@@ -13,3 +13,10 @@ SHA256,453fb1c4b3b48361fa8a67dcedf1eaec39449cb5a146a7770c63d1dc0d7562f0,CoinMine
 Registry,HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Jzwvix,BitRAT persistence,High,PhishStrike
 File_Path,%APPDATA%\Ozndcoodb\Jzwvix.exe,BitRAT persistent copy,High,PhishStrike
 Telegram_Bot_ID,5610920260,AsyncRAT C2/exfiltration channel,High,PhishStrike
+SHA256,f73c827c0d7aea6ac20e3e3c2e7530df62484e03b071669585acda9ba236e446,metamask.php - crypto phishing kit credential stealer,High,GrabThePhisher
+SHA256,d6c702c530ec062f8d12ac232cb05ba4baa7f0dc132ad92b6daf124ab76861c9,Fake MetaMask import page,High,GrabThePhisher
+SHA256,9b221eec46345975fc832892eb6075495ee57ff5cca375ef730ac339fb63d2f8,Fake PancakeSwap landing page,High,GrabThePhisher
+Telegram_Bot_ID,5457463144,Phishing kit exfiltration bot (token withheld),High,GrabThePhisher
+Telegram_Chat_ID,5442785564,Phishing kit receiving chat,High,GrabThePhisher
+Alias,j1j1b1s@m3r0,Phishing kit author signature,Medium,GrabThePhisher
+URL_Pattern,/metamask/metamask.php,Path to credential stealer on kit hosting servers,Medium,GrabThePhisher
