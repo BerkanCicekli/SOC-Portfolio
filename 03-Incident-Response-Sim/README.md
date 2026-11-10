@@ -21,7 +21,7 @@ Full-cycle incident investigations in Splunk: scoping alerts, correlating logs a
 | # | Incident | Key techniques | Report |
 |---|----------|----------------|--------|
 | 1 | Brute force → account compromise | *TBC* | *coming soon* |
-| 2 | Malicious PowerShell execution | *TBC* | *coming soon* |
+| 2 | Encoded PowerShell, WMI lateral movement and a lookalike backdoor account | PowerShell deobfuscation, AMSI bypass, WMIC remote execution, local account creation | [report](investigations/02-malicious-powershell/report.md) |
 | 3 | Conti ransomware on an Exchange server | Web shell, process injection, LSASS credential dumping, backdoor admin, ransomware | [report](investigations/03-conti-ransomware/report.md) |
 
 ## TryHackMe rooms completed
@@ -29,7 +29,8 @@ Full-cycle incident investigations in Splunk: scoping alerts, correlating logs a
 | Room | Focus | Done |
 |------|-------|------|
 | Splunk basics | SPL fundamentals | ☐ |
-| Investigating with Splunk | First investigation | ☐ |
+| Investigating with Splunk | First investigation | ☑ |
+| Conti | Ransomware investigation | ☑ |
 | Sysmon | Endpoint logging | ☐ |
 | Windows Event Logs | Security events | ☐ |
 | Incident Handling with Splunk | Multi-stage attack | ☐ |
