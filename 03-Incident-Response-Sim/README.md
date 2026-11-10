@@ -28,11 +28,11 @@ Full-cycle incident investigations in Splunk: scoping alerts, correlating logs a
 
 | Room | Focus | Done |
 |------|-------|------|
-| Splunk basics | SPL fundamentals | ☐ |
+| Splunk basics | SPL fundamentals | ☑ |
 | Investigating with Splunk | First investigation | ☑ |
 | Conti | Ransomware investigation | ☑ |
-| Sysmon | Endpoint logging | ☐ |
-| Windows Event Logs | Security events | ☐ |
+| Sysmon | Endpoint logging | ☑ |
+| Windows Event Logs | Security events | ☑ |
 | Incident Handling with Splunk | Multi-stage attack | ☑ |
 
 *(Room names on TryHackMe change)*
