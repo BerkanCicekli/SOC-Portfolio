@@ -25,5 +25,17 @@ Web servers serve pages; they should almost never need to open a command prompt.
 - Exchange and IIS maintenance can spawn processes during updates. Check against change windows.
 
 ## Testing
-**Status:** written from investigation findings, not yet run as a saved search.
-**Expected result on `botsv1`:** a hit for `php-cgi.exe` → `cmd.exe` at 21:56:18 on 10 August 2016 (`sourcetype=xmlwineventlog`).
+**Status:** ✅ Tested on 2026-11-10 against `botsv1` (TryHackMe – Incident Handling with Splunk).
+
+Run as:
+```spl
+index=botsv1 sourcetype=xmlwineventlog EventCode=1 (ParentImage="*\\php-cgi.exe" OR ParentImage="*\\w3wp.exe")
+    (Image="*\\cmd.exe" OR Image="*\\powershell.exe")
+| table _time, User, ParentImage, Image, CommandLine
+```
+
+![Rule 4 test](screenshots/rule-04-test.png)
+
+**Result:** 17 hits, all `php-cgi.exe` → `cmd.exe` running as `NT AUTHORITY\IUSR` between 21:55:22 and 22:21:34. **All 17 are true positives**: every command the attacker sent through the `agent.php` web shell, from the first `echo` test to `3791.exe` and the `move` commands that defaced the site. No false positives in this dataset.
+
+The rule found **more** than the original investigation, which had only the `3791.exe` launch. See the [threat hunt](../threat-hunting/01-post-compromise-web-server.md).

@@ -1,6 +1,6 @@
 # Project 3: Incident Response Simulation
 
-**Platform:** TryHackMe · **Tools:** Splunk, Sysmon, Windows Event Logs · **Status:** In progress
+**Platform:** TryHackMe · **Tools:** Splunk, Sysmon, Windows Event Logs · **Status:** Complete
 
 ## Overview
 

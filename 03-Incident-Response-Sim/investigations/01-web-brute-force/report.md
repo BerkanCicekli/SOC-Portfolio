@@ -223,6 +223,14 @@ This file wasn't used in the web attack itself. It shows the group had **phishin
 
 **IP reputation note:** 23.22.63.114 is an **Amazon AWS** address with **0/92** detections on VirusTotal, even though in this case it ran a brute force, hosted the C2 domain and has malware talking to it. Reputation alone would have cleared it; the behaviour in the logs did not.
 
+### 6. Update from the follow-up threat hunt
+
+A [threat hunt](../../threat-hunting/01-post-compromise-web-server.md) on the same data later answered some of the open questions below:
+- The attacker used the `agent.php` web shell **interactively from 21:55 to 22:21** (`echo`, `dir`, `ls`, `ifconfig`).
+- The defacement went live at **22:20:33**, when the downloaded image was renamed to `imnotbatman.jpg` with `move`.
+- Through the backdoor's shells they ran **network discovery**: `whoami`, `net user`, `net session`, `net share`, `net view /domain`, `net use c:\share` and `tasklist`.
+- A Joomla update check at **21:48** is consistent with the attacker's first admin login.
+
 ---
 
 ## MITRE ATT&CK

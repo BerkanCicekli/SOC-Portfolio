@@ -25,5 +25,16 @@ In the [web server investigation](../investigations/01-web-brute-force/report.md
 Check whether any attempt from that IP, **or any other IP shortly afterwards**, succeeded with the same username. In this case the successful login came from a *different* IP.
 
 ## Testing
-**Status:** written from investigation findings, not yet run as a saved search.
-**Expected result on `botsv1`:** one hit for 23.22.63.114 → 192.168.250.70 with `Python-urllib/2.7`, which would be a true positive.
+**Status:** ✅ Tested on 2026-11-10 against `botsv1` (TryHackMe – Incident Handling with Splunk).
+
+Run as:
+```spl
+index=botsv1 sourcetype=stream:http http_method=POST uri="*/administrator/index.php"
+| bin _time span=5m
+| stats count as attempts, values(http_user_agent) as agents by _time, src_ip
+| where attempts > 20
+```
+
+![Rule 1 test](screenshots/rule-01-test.png)
+
+**Result:** 1 hit. **23.22.63.114** made **412 attempts** in the 5-minute window starting 21:45 on 10 August 2016, with User-Agent `Python-urllib/2.7`. This is a **true positive**, the brute force from the investigation. The attacker's real login from 40.80.148.42 (one attempt) correctly did not trigger. No false positives.
