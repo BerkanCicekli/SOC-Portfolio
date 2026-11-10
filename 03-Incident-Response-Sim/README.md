@@ -22,7 +22,7 @@ Full-cycle incident investigations in Splunk: scoping alerts, correlating logs a
 |---|----------|----------------|--------|
 | 1 | Brute force → account compromise | *TBC* | *coming soon* |
 | 2 | Malicious PowerShell execution | *TBC* | *coming soon* |
-| 3 | Ransomware / APT campaign | *TBC* | *coming soon* |
+| 3 | Conti ransomware on an Exchange server | Web shell, process injection, LSASS credential dumping, backdoor admin, ransomware | [report](investigations/03-conti-ransomware/report.md) |
 
 ## TryHackMe rooms completed
 
