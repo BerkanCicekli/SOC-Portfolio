@@ -20,7 +20,7 @@ Full-cycle incident investigations in Splunk: scoping alerts, correlating logs a
 
 | # | Incident | Key techniques | Report |
 |---|----------|----------------|--------|
-| 1 | Brute force → account compromise | *TBC* | *coming soon* |
+| 1 | Web server brute force, backdoor upload and defacement | Vulnerability scanning, brute force, web shell, reverse shell, defacement, threat intel pivoting | [report](investigations/01-web-brute-force/report.md) |
 | 2 | Encoded PowerShell, WMI lateral movement and a lookalike backdoor account | PowerShell deobfuscation, AMSI bypass, WMIC remote execution, local account creation | [report](investigations/02-malicious-powershell/report.md) |
 | 3 | Conti ransomware on an Exchange server | Web shell, process injection, LSASS credential dumping, backdoor admin, ransomware | [report](investigations/03-conti-ransomware/report.md) |
 
@@ -33,7 +33,7 @@ Full-cycle incident investigations in Splunk: scoping alerts, correlating logs a
 | Conti | Ransomware investigation | ☑ |
 | Sysmon | Endpoint logging | ☐ |
 | Windows Event Logs | Security events | ☐ |
-| Incident Handling with Splunk | Multi-stage attack | ☐ |
+| Incident Handling with Splunk | Multi-stage attack | ☑ |
 
 *(Room names on TryHackMe change)*
 
