@@ -591,3 +591,80 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
   - Lures that pose as security tools exploit careful users.
 
 ---
+
+## Alert #11 – SOC257 VPN Connection Detected from Unauthorized Country
+- **Date worked:** 2026-11-13
+- **Severity:** Low
+- **Alert type:** Unauthorized Access
+- **Difficulty:** Easy
+- **Hypothesis:** A VPN login from an unexpected country could be the user travelling, or an attacker using stolen credentials. The key questions were whether the source was known to be malicious, whether the login actually succeeded, and whether anything reached the internal network.
+
+**Evidence:**
+- Alert: VPN connection to `hxxps://vpn-letsdefend[.]io` for **monica@letsdefend.io** from **113[.]161[.]158[.]12** to the VPN gateway 33[.]33[.]33[.]33, at 02:04 local time (UTC+3). MITRE tags: T1595, T1133, T1621.
+- Threat intel: 113[.]161[.]158[.]12 tagged **Brute Force** (AbuseCH). The login location was Hanoi, Vietnam.
+- Firewall (22:49–22:59 UTC): about 11 connections from the attacker IP to the VPN gateway on random high ports (20456, 11121, 38409, 54162 and others), plus 443 – a **port scan** of the gateway before the login attempts.
+- Proxy (23:01:01, 23:02:26, 23:03:09): `POST /logon.html` for Monica, each with **Response Status 200** – the password was accepted and the VPN moved on to the OTP step.
+- Firewall (23:01, 23:02, 23:03): **"Incorrect OTP Code"** after each login. No successful session afterwards and no further activity from the IP.
+- Email Security: at each attempt, security@letsdefend.io sent Monica an **"OTP for MFA Activation"** email with the attempt's details (IP 113.161.158.12, Hanoi, Windows, Chrome). The code went to Monica's mailbox, which the attacker couldn't read.
+- No failed password attempts: the attacker had Monica's **correct password from the first try**, so the credentials were stolen beforehand (phishing, reuse or a leak), not guessed here.
+- Endpoint (host Monica): normal processes (services, svchost Task Scheduler, Chrome, GoogleUpdate). Terminal history showed 12 discovery-style commands (`systeminfo`, `ipconfig /all`, `netstat -ano`, `tasklist`, `net user`, `wmic product get name` …) run **exactly every 15 minutes from 08:00 to 10:45**, five hours after the attempts. The fixed schedule points to an automated inventory script, not the attacker, who never got a VPN session.
+
+**Timeline (UTC):**
+
+| Time | Event |
+|------|-------|
+| 22:49:47–22:59:07 | Port scan of the VPN gateway from 113.161.158.12 |
+| 23:01:01 | Login with Monica's password accepted; OTP sent to Monica; incorrect OTP entered |
+| 23:02:26 | Second attempt: password accepted, incorrect OTP |
+| 23:03:09 | Third attempt: password accepted, incorrect OTP |
+| After 23:03 | No further activity from the attacker IP; no successful VPN session |
+
+**Screenshots:**
+
+![Alert details](screenshots/alert11-alert-details.png)
+
+*VPN login for Monica from 113.161.158.12, flagged as an unauthorized country.*
+
+![Threat intel](screenshots/alert11-threat-intel.png)
+
+*The source IP is tagged Brute Force.*
+
+![Port scan](screenshots/alert11-port-scan.png)
+
+*Connections to the VPN gateway on random ports before the login attempts.*
+
+![OTP failures](screenshots/alert11-otp-failures.png)
+
+*Three logins: each accepted at the proxy (200), then rejected at the firewall for an incorrect OTP.*
+
+![Proxy response](screenshots/alert11-proxy-response.png)
+
+*Response 200 on logon.html: the password was correct, so the VPN asked for an OTP.*
+
+![OTP email](screenshots/alert11-otp-email.png)
+
+*The MFA activation code went to Monica's mailbox, with the attacker's location: Hanoi.*
+
+![Terminal history](screenshots/alert11-terminal-history.png)
+
+*Commands on Monica's host every 15 minutes, hours later: an automated pattern, not the attacker.*
+
+**Outcome:**
+- **Verdict:** True Positive (attempted unauthorized access, blocked by MFA)
+- **Reasoning:** A known malicious IP scanned the VPN gateway, then logged in three times with Monica's valid password. MFA stopped it: the OTP went to Monica's email and every code entered was wrong. No VPN session was created and nothing reached the internal network, so no system was compromised – but Monica's password is.
+- **Recommended action:** Reset Monica's password and confirm her MFA enrolment with her directly (the attacker was trying to activate MFA on her account); block 113.161.158.12; restrict VPN logins from countries the business doesn't operate in; check other accounts for logins from this IP; find out how the password leaked (phishing email, reuse on another site). Host isolation not required.
+- **MITRE ATT&CK:**
+  - Reconnaissance: T1595 Active Scanning
+  - Initial Access / Persistence: T1133 External Remote Services; T1078 Valid Accounts
+  - Credential Access: T1621 Multi-Factor Authentication Request Generation
+- **Time taken:** 23 min
+- **Platform feedback:** 30 points (94%). Missed "Is sensitive data at risk?": answered Yes, correct was No.
+- **Lessons learned:**
+  - A **200 response is not a successful login**. Here it only meant the password step passed; the firewall's OTP result showed the attempt failed. Read every log source before deciding.
+  - **Only OTP failures, no password failures**, means the password was already known. The real incident is a compromised credential, and the fix is a password reset, not isolation.
+  - **MFA works.** Valid stolen credentials were not enough.
+  - **Don't overstate impact.** I answered that sensitive data was at risk because the password was compromised; the platform's view is that with MFA intact, no data was reachable. The compromised account is handled through containment, not as data exposure.
+  - Discovery commands aren't always an attacker: a fixed 15-minute schedule, hours after a failed attempt, points to automation.
+  - **What I'd check next time:** the Network Action tab on the host, to show directly that the attacker IP never connected to it.
+
+---

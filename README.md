@@ -16,7 +16,7 @@ Hands-on security operations work completed on **LetsDefend**, **CyberDefenders*
 
 | Project | What I did |
 |---|---|
-| **01 – Live SOC Alert Monitoring** | Investigated **10 security alerts** end to end (all verdicts correct, including 3 Critical) and wrote **3 detailed case studies** |
+| **01 – Live SOC Alert Monitoring** | Investigated **11 security alerts** end to end (all verdicts correct, including 3 Critical) and wrote **3 detailed case studies** |
 | **02 – Phishing Email Analysis** | Analysed **3 phishing campaigns** (malware delivery, a credential-phishing kit, ransomware) and built an **IOC database** of 32 defanged indicators |
 | **03 – Incident Response Simulation** | Ran **3 full Splunk investigations** (web server compromise, malicious PowerShell with lateral movement, Conti ransomware), wrote **5 detection rules** (2 tested, both with zero false positives) and completed a **threat hunt** that found activity the original investigation missed |
 
