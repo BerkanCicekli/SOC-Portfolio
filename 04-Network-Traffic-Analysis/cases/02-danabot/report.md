@@ -1,6 +1,6 @@
 # Network Analysis: DanaBot – From a JavaScript Download to a Banking Trojan
 
-**Lab:** CyberDefenders – DanaBot · **Category:** Network Forensics · **Difficulty:** Easy
+**Lab:** CyberDefenders – DanaBot · **Category:** Network Forensics · **Difficulty:** Easy · **Result:** 6/6
 **Tools:** Wireshark · VirusTotal · Python (to decode the obfuscated script without running it)
 **Skills:** PCAP analysis · DNS and HTTP analysis · JavaScript deobfuscation · Malware delivery chains · ATT&CK mapping
 
