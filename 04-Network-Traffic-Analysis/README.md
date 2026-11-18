@@ -12,6 +12,7 @@ Investigating attacks from packet captures (PCAPs): reading raw network traffic 
 | # | Case | What it shows | Report |
 |---|------|---------------|--------|
 | 1 | PsExec Hunt: lateral movement over SMB | SMB2 and NTLM analysis, ADMIN$/IPC$ shares, PsExec fingerprint, two compromised accounts | [report](cases/01-psexec-hunt/report.md) |
+| 2 | DanaBot: JavaScript download to banking trojan | DNS and HTTP analysis, JavaScript deobfuscation, rundll32 execution, C2 and likely exfiltration over HTTPS | [report](cases/02-danabot/report.md) |
 
 ## Approach
 
@@ -31,3 +32,5 @@ Investigating attacks from packet captures (PCAPs): reading raw network traffic 
 | `ntlmssp.messagetype == 0x00000002` | NTLM challenges: target machine names |
 | `ntlmssp.messagetype == 0x00000003` | NTLM AUTH: usernames and source hosts |
 | `ip.addr == 10.0.0.130` | All traffic to or from one machine |
+| `dns` | Domain lookups – malicious domains stand out among normal traffic |
+| `http.request` | Every web request, including file downloads |

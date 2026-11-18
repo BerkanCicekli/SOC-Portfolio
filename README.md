@@ -20,7 +20,7 @@ Hands-on security operations work completed on **LetsDefend**, **CyberDefenders*
 | **01 – Live SOC Alert Monitoring** | Investigated **11 security alerts** end to end (all verdicts correct, including 3 Critical) and wrote **3 detailed case studies** |
 | **02 – Phishing Email Analysis** | Analysed **3 phishing campaigns** (malware delivery, a credential-phishing kit, ransomware) and built an **IOC database** of 32 defanged indicators |
 | **03 – Incident Response Simulation** | Ran **3 full Splunk investigations** (web server compromise, malicious PowerShell with lateral movement, Conti ransomware), wrote **5 detection rules** (2 tested, both with zero false positives) and completed a **threat hunt** that found activity the original investigation missed |
-| **04 – Network Traffic Analysis** | Investigating attacks from packet captures in Wireshark, starting with **PsExec lateral movement** across two workstations using two compromised accounts |
+| **04 – Network Traffic Analysis** | Investigating attacks from packet captures in Wireshark, covering **PsExec lateral movement** across two workstations and a **DanaBot banking-trojan infection**, from the JavaScript download to C2 |
 
 Every report includes the evidence (queries, logs and screenshots), a timeline, MITRE ATT&CK mapping, defanged IOCs, recommendations and what I learned.
 
