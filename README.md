@@ -11,6 +11,7 @@ Hands-on security operations work completed on **LetsDefend**, **CyberDefenders*
 | 01 | [Live SOC Alert Monitoring](01-Live-SOC-Monitoring/) | LetsDefend | Alert triage, log analysis, escalation decisions | Complete |
 | 02 | [Phishing Email Analysis](02-Phishing-Analysis/) | CyberDefenders | Email header analysis, URL/attachment analysis, IOC extraction | Complete |
 | 03 | [Incident Response Simulation](03-Incident-Response-Sim/) | TryHackMe | Splunk SPL, Sysmon, Windows Event Logs, threat hunting, detection rules | Complete |
+| 04 | [Network Traffic Analysis](04-Network-Traffic-Analysis/) | CyberDefenders | Wireshark, PCAP analysis, SMB and NTLM, lateral movement | In progress |
 
 ## At a glance
 
@@ -19,6 +20,7 @@ Hands-on security operations work completed on **LetsDefend**, **CyberDefenders*
 | **01 – Live SOC Alert Monitoring** | Investigated **11 security alerts** end to end (all verdicts correct, including 3 Critical) and wrote **3 detailed case studies** |
 | **02 – Phishing Email Analysis** | Analysed **3 phishing campaigns** (malware delivery, a credential-phishing kit, ransomware) and built an **IOC database** of 32 defanged indicators |
 | **03 – Incident Response Simulation** | Ran **3 full Splunk investigations** (web server compromise, malicious PowerShell with lateral movement, Conti ransomware), wrote **5 detection rules** (2 tested, both with zero false positives) and completed a **threat hunt** that found activity the original investigation missed |
+| **04 – Network Traffic Analysis** | Investigating attacks from packet captures in Wireshark, starting with **PsExec lateral movement** across two workstations using two compromised accounts |
 
 Every report includes the evidence (queries, logs and screenshots), a timeline, MITRE ATT&CK mapping, defanged IOCs, recommendations and what I learned.
 
@@ -28,6 +30,7 @@ Every report includes the evidence (queries, logs and screenshots), a timeline, 
 - **Endpoint:** EDR investigation, process trees, persistence and process injection analysis
 - **Analysis:** Alert triage, phishing analysis, timeline reconstruction, IOC extraction, PowerShell deobfuscation, threat hunting, detection engineering
 - **Frameworks:** MITRE ATT&CK, Cyber Kill Chain, NIST Incident Response Lifecycle
+- **Network:** Wireshark, PCAP analysis, SMB2, NTLM, TCP/IP
 - **Tools:** VirusTotal, AbuseIPDB, URLhaus, MalwareBazaar, sandbox reports (VMRay, ANY.RUN), CyberChef, WHOIS
 
 ## Certifications
