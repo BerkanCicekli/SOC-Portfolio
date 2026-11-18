@@ -1,7 +1,7 @@
 # Project 4: Network Traffic Analysis
 
 **Platform:** CyberDefenders (Network Forensics labs) · **Tool:** Wireshark
-**Status:** In progress
+**Status:** Complete
 
 Investigating attacks from packet captures (PCAPs): reading raw network traffic to work out who attacked what, which accounts and tools they used, and how they moved through the network.
 
@@ -13,6 +13,7 @@ Investigating attacks from packet captures (PCAPs): reading raw network traffic 
 |---|------|---------------|--------|
 | 1 | PsExec Hunt: lateral movement over SMB | SMB2 and NTLM analysis, ADMIN$/IPC$ shares, PsExec fingerprint, two compromised accounts | [report](cases/01-psexec-hunt/report.md) |
 | 2 | DanaBot: JavaScript download to banking trojan | DNS and HTTP analysis, JavaScript deobfuscation, rundll32 execution, C2 and likely exfiltration over HTTPS | [report](cases/02-danabot/report.md) |
+| 3 | Tomcat Takeover: port scan to root shell | Scan detection, gobuster enumeration, Basic-auth brute force, malicious WAR upload, reverse shell and cron persistence | [report](cases/03-tomcat-takeover/report.md) |
 
 ## Approach
 
@@ -34,3 +35,6 @@ Investigating attacks from packet captures (PCAPs): reading raw network traffic 
 | `ip.addr == 10.0.0.130` | All traffic to or from one machine |
 | `dns` | Domain lookups – malicious domains stand out among normal traffic |
 | `http.request` | Every web request, including file downloads |
+| `tcp.flags.syn == 1 && tcp.flags.ack == 0` | Connection attempts – port scans and outbound callbacks |
+| `tcp.flags.syn == 1 && tcp.flags.ack == 1` | SYN-ACK replies – which ports were open |
+| `http.authorization` | Basic-auth login attempts, decoded |
