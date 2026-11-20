@@ -668,3 +668,62 @@ Every alert I've worked on LetsDefend, in order. Entries include alerts I classi
   - **What I'd check next time:** the Network Action tab on the host, to show directly that the attacker IP never connected to it.
 
 ---
+
+## Alert #12 – SOC177 Multiple User Login Failures Detected on Same Machine
+- **Date worked:** 2026-11-20
+- **Severity:** Low
+- **Alert type:** Brute Force
+- **Difficulty:** Medium
+- **Role:** Incident Responder
+- **Hypothesis:** The L1 analyst saw repeated login failures for one user but couldn't tell whether the brute force succeeded. The questions were: is the source malicious, how was the server reached, was there any successful login, and did anything happen on the host afterwards?
+
+**Evidence:**
+- Alert: more than 8 failed logins in 5 minutes for user **Stephen** from **89[.]187[.]185[.]171** to **172.16.17.153**. MITRE tags: T1597.001, T1586, T1133, T1110.
+- Log Management: **18 events**, all from the attacker IP to the same host on **port 3389 (RDP)** – RDP exposed to the internet. Every OS event was **Event ID 4625** with error code **0xC000006A** ("user name is correct but the password is wrong"), between about 10:08 and 10:14:55.
+- **No Event ID 4624** (successful logon) from the attacker IP. Only one target host.
+- Attempts were slow – one every 20–60 seconds – a pace often used to avoid account lockout. It still tripped the 8-in-5-minutes rule.
+- Error code 0xC000006A means the **username was valid**: the attacker already knew a real account name, which fits the reconnaissance tags on the alert.
+- Threat intel: clean on LetsDefend; VirusTotal **1/92 malicious, 2 suspicious** (including GreyNoise, which tracks internet scanners). The IP belongs to **AS60068 Datacamp Limited**, tagged **VPN** – the same provider as the attacker in Alert #9.
+- Endpoint terminal history: PowerShell queries for the OS version, registry build information and Xen/Citrix/AWS drivers, plus `silcollector.cmd` (Software Inventory Logging) at **13:00**, three hours after the attempts. Dozens ran within fractions of a second, output as JSON – an **automated AWS EC2 / inventory agent**, not a person.
+- Network Action: connections at 13:00–13:02 only to Microsoft, Akamai, Google and AWS internal (169.254.169.250) addresses – the host starting up and its agents checking in. **No connection to the attacker IP.**
+
+**Screenshots:**
+
+![Alert details](screenshots/alert12-alert-details.png)
+
+*Repeated RDP login failures for Stephen from an external IP.*
+
+![Failed logins](screenshots/alert12-failed-logins.png)
+
+*Every OS event is 4625 with 0xC000006A: valid username, wrong password. No 4624.*
+
+![VirusTotal](screenshots/alert12-virustotal.png)
+
+*1/92 malicious, tagged VPN, owned by Datacamp Limited.*
+
+![Terminal history](screenshots/alert12-terminal-history.png)
+
+*Rapid, JSON-formatted inventory commands three hours later: an automated agent.*
+
+![Network action](screenshots/alert12-network-action.png)
+
+*Only Microsoft, Google, Akamai and AWS connections – nothing to the attacker.*
+
+**Outcome:**
+- **Verdict:** True Positive (RDP brute force, unsuccessful)
+- **Reasoning:** A VPN-hosted IP made 18 attempts against RDP for a valid account. Every attempt failed with a wrong password, there was no successful logon, and neither the host's processes nor its network traffic showed any attacker activity.
+- **Recommended action:** Block 89.187.185.171; remove RDP from the internet or put it behind a VPN; enforce account lockout and MFA for remote access; reset Stephen's password as a precaution, since his username is known to the attacker. Host isolation not required.
+- **MITRE ATT&CK:**
+  - Reconnaissance: T1597.001 Search Closed Sources: Threat Intel Vendors (per alert tag)
+  - Resource Development: T1586 Compromise Accounts (attempted)
+  - Initial Access: T1133 External Remote Services (internet-facing RDP)
+  - Credential Access: T1110.001 Brute Force: Password Guessing
+- **Time taken:** 22 min
+- **Platform feedback:** 25 points, 100% playbook success.
+- **Lessons learned:**
+  - **The L1 question was the right one: did it succeed?** The answer came from looking for 4624 after the 4625s, then confirming on the endpoint and network that nothing happened.
+  - **Error codes carry information.** 0xC000006A told me the attacker had a valid username, which changes the recommendation: the account is being targeted, so reset and monitor it.
+  - **A clean reputation isn't a verdict.** LetsDefend had no record of the IP; VirusTotal showed a VPN provider I'd already seen in another attack.
+  - **Not every command is the attacker.** Inventory and cloud agents run discovery-style commands too. Timing, speed and output format separated them from attacker activity, as in Alerts #10 and #11.
+
+---
